@@ -68,7 +68,7 @@
                             internal-time-units-per-second)))))
 
 (defun game (side host port fullscreen)
-  (glop:with-window (window "Pong" 800 480
+  (glop:with-window (window "Pong" 800 450
                             :win-class 'window
                             :fullscreen fullscreen)
     (with-field (side)
@@ -95,7 +95,7 @@
                          (game-loop window))
                     (socket-close socket))))))))
 
-(defun start (side &key (host "0.0.0.0") (port 4321) (fullscreen t))
+(defun start (side &key (host "0.0.0.0") (port 4320) (fullscreen t))
   (handler-case
       (game side host port fullscreen)
     (serious-condition ())))
