@@ -67,7 +67,7 @@
                                (get-internal-real-time))
                             internal-time-units-per-second)))))
 
-(defun start (side &key (host "0.0.0.0") (port 4321) (fullscreen t))
+(defun game (side host port fullscreen)
   (glop:with-window (window "Pong" 800 480
                             :win-class 'window
                             :fullscreen fullscreen)
@@ -94,3 +94,8 @@
                          (receive-state (ball *field*) (socket-stream socket))
                          (game-loop window))
                     (socket-close socket))))))))
+
+(defun start (side &key (host "0.0.0.0") (port 4321) (fullscreen t))
+  (handler-case
+      (game side host port fullscreen)
+    (serious-condition ())))
