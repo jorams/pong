@@ -120,7 +120,7 @@
 
 (defun start-playing (&optional (field *field*))
   (setf (location (ball field)) (cons (/ (width field) 2) (/ (height field) 2))
-        (movement-speed (ball field)) (cons (if (eq (side field) :left) -10 10) 0)
+        (movement-speed (ball field)) (cons 10 0)
         *playingp* t))
 
 (defun move-paddle (&optional (field *field*))
@@ -178,8 +178,7 @@
             (send-state (ball field) (socket-stream (connection *field*))))))
       ;; Bounce on the other side
       ((>= right (width field))
-       (receive-state (ball field) (socket-stream (connection *field*)))
-       #+nil (setf x-speed (- x-speed))))))
+       (receive-state (ball field) (socket-stream (connection *field*)))))))
 
 (defun tick (&optional (field *field*))
   (let ((*field* field))

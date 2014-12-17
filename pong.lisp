@@ -42,7 +42,7 @@
     (gl:with-primitive :quads
       (gl:color 1 1 1)
       (rectangle (player *field*) (eq (side *field*) :right))
-      (gl:color 1 1 0)
+      (gl:color 1 1 1)
       (rectangle (ball *field*) (eq (side *field*) :right))))
   (gl:flush)
   (glop:swap-buffers window))
@@ -67,10 +67,10 @@
                                (get-internal-real-time))
                             internal-time-units-per-second)))))
 
-(defun start (side &key (host "0.0.0.0") (port 4321))
+(defun start (side &key (host "0.0.0.0") (port 4321) (fullscreen t))
   (glop:with-window (window "Pong" 800 480
                             :win-class 'window
-                            :fullscreen nil)
+                            :fullscreen fullscreen)
     (with-field (side)
       (ecase side
         (:left (let ((socket (socket-listen host port
@@ -80,6 +80,9 @@
                         (setf (connection *field*)
                               (socket-accept socket
                                              :element-type 'nibbles:octet))
+                        (start-playing)
+                        (send-state (ball *field*)
+                                    (socket-stream (connection *field*)))
                         (game-loop window))
                    (socket-close socket))))
         (:right (let ((socket (socket-connect host port
@@ -87,5 +90,7 @@
                   (unwind-protect
                        (progn
                          (setf (connection *field*) socket)
+                         (start-playing)
+                         (receive-state (ball *field*) (socket-stream socket))
                          (game-loop window))
                     (socket-close socket))))))))
