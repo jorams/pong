@@ -53,20 +53,39 @@
 (defmethod glop:on-close ((window window))
   (setf *closedp* t))
 
-(defun start (&optional (side :left))
+(defun game-loop (window)
+  (loop with *closedp* = nil
+        until *closedp*
+        for next-time = (+ (get-internal-real-time)
+                           (/ internal-time-units-per-second +fps+))
+        unless *playingp* do
+          (start-playing)
+        do (glop:dispatch-events window)
+           (tick)
+           (render window)
+           (sleep (max 0 (/ (- next-time
+                               (get-internal-real-time))
+                            internal-time-units-per-second)))))
+
+(defun start (side &key (host "0.0.0.0") (port 4321))
   (glop:with-window (window "Pong" 800 480
                             :win-class 'window
                             :fullscreen nil)
     (with-field (side)
-      (loop with *closedp* = nil
-            until *closedp*
-            for next-time = (+ (get-internal-real-time)
-                               (/ internal-time-units-per-second +fps+))
-            unless *playingp* do
-              (start-playing)
-            do (glop:dispatch-events window)
-               (tick)
-               (render window)
-               (sleep (max 0 (/ (- next-time
-                                   (get-internal-real-time))
-                                internal-time-units-per-second)))))))
+      (ecase side
+        (:left (let ((socket (socket-listen host port
+                                            :reuse-address t)))
+                 (unwind-protect
+                      (progn
+                        (setf (connection *field*)
+                              (socket-accept socket
+                                             :element-type 'nibbles:octet))
+                        (game-loop window))
+                   (socket-close socket))))
+        (:right (let ((socket (socket-connect host port
+                                              :element-type 'nibbles:octet)))
+                  (unwind-protect
+                       (progn
+                         (setf (connection *field*) socket)
+                         (game-loop window))
+                    (socket-close socket))))))))

@@ -1,3 +1,3 @@
 (defpackage :pong
-  (:use :cl :let-plus)
+  (:use :cl :let-plus :usocket)
   (:export :start))
