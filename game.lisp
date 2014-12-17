@@ -170,10 +170,8 @@
          ((or (<= (top player) bottom (bottom player))
               (<= (top player) top (bottom player)))
           (setf x-speed (1+ (- x-speed)))
-          (incf y-speed (/ (averaged-y-speed player)
-                           (if (< x (x player))
-                               3
-                               -3)))
+          (incf y-speed (+ (* 1/20 (- y (y player)))
+                           (* 1/3 (averaged-y-speed player))))
           (send-state (ball field) (socket-stream (connection *field*))))
          (t (setf *playingp* nil)
             (start-playing)
